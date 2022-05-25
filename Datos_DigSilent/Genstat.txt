@@ -1,0 +1,1 @@
+Nombre,Subestacion,Nodo,Tipo,V_nom[kV],Set_point[pu],S_nom[MVA],PF[cos],P_nom[MW],P_gen[MW],Q_gen[MVAr],P_max[MW],P_min[MW],Q_max[MVAr],Q_min[MVAr],Fuera_servicio

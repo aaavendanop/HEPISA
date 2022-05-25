@@ -1,0 +1,1 @@
+Nombre,Subestacion,Nodo,Tipo,Vn[kV],P[MW],Q[MVAr],Max_step,Actual_step,Fuera_servicio

@@ -1,0 +1,587 @@
+!Codigo para exportar los datos de red
+
+!--------------------------------------------------------------------
+!INICIALIZACION DE VARIABLES
+!--------------------------------------------------------------------
+
+double Numero_nodo, Tipo_nodo,Tension_nodo, Max_v_nodo, Min_v_nodo,Estado_nodo;
+string csvName, Nombre_nodo, Subestacion_nodo, Zona_nodo,Point_name,fold_name;
+object fold;
+
+double Longitud_linea,R,X,C,R0,X0,C0,I_nom,Estado_linea,Max_carga,Tension_linea,R_pu,X_pu,C_pu;
+string Nombre_linea,Sub_linea_i,Nodo_linea_i,Sub_linea_j,Nodo_linea_j;
+object Nodo_i, Nodo_j;
+
+double S_carga,Pf_carga,P_carga, Q_carga;
+string Nombre_carga,Sub_carga,Nodo_carga;
+object Sub_i;
+
+double N_und,S_gen,Pf_gen,P_gen,Q_gen,P_max,P_min,Q_max,Q_min,P_nom,Tension_nom,Set_point,Factor_escala,Inercia,Estado_generador,R_sub,X_sub,slack;
+string Nombre_gen, Sub_gen, Nodo_gen, Categoria_gen;
+object PQ_curve;
+
+double S_nom,V_i,V_j,V_k,Uk,Ukr,U0k,U0kr,Perd,I0_per,mag0,mag0_rx,si0_hv,shift_deg,Estado_trf,R_pu_HV,R_pu_MV,R_pu_LV,X_pu_HV,X_pu_MV,X_pu_LV,tapside,tappos,tapneutral,tapmax,tapmin,tapstepv,tapsteps;
+string Nombre_trf,Sub_trf_i,Nodo_trf_i,Sub_trf_j,Nodo_trf_j,Sub_trf_k,Nodo_trf_k;
+object Trafo, Nodo_k;
+
+double S_nom_hv,S_nom_mv,S_nom_lv,Vk_hv,Vk_mv,Vk_lv,Vkr_hv,Vkr_mv,Vkr_lv,pfe_hv,pfe_mv,pfe_lv,tapmax_h,tapmax_m,tapmax_l;
+double Shift_hv,Shift_mv,Shift_lv;
+
+double P_cap,Q_cap,Vn_cap,type_cap,Estado_cap,max_step,actual_step;
+string Nombre_cap,Sub_cap,Nodo_cap;
+
+double Vn_switch,In_switch,R_switch,Estado_switch;
+string Nombre_switch,Switch_type,Sub_switch_i,Nodo_switch_i,Sub_switch_j,Nodo_switch_j;
+
+set Nodos,Lineas,Cargas,Generadores_stat,Generadores,Transformadores,Capacitores,Switches,Redes_ext,Reactores;
+object Nodo,Linea,Carga,Generador,Transformador,Capacitor,Switch,Red_ext,Reactor;
+
+!--------------------------------------------------------------------
+!ESCRITURA BANDERA INICIO
+!--------------------------------------------------------------------
+
+csvName = sprintf('%sFlag_start.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s','1');
+fclose(0);
+
+!--------------------------------------------------------------------
+!EJECUCION DEL FLUJO DE CARGA
+!--------------------------------------------------------------------
+
+Ldf.Execute();
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS NODOS DEL SISTEMA
+!--------------------------------------------------------------------
+
+Nodos = AllRelevant('*.ElmTerm');
+csvName = sprintf('%sNodos.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s','Num','Nombre','Subestacion','Zona','Tipo','[kV]','Max_V[p.u.]','Min_v[p.u.]','Fuera_Servicio');
+
+Numero_nodo = 0;
+
+for(Nodo = Nodos.First();Nodo;Nodo = Nodos.Next()){
+  fold = Nodo:fold_id;
+  fold_name = fold:loc_name;
+  Nombre_nodo = sprintf('%s%s%s',Nodo:loc_name,'/',fold_name);
+  Point_name = Nodo:NodeName;
+  Tipo_nodo = Nodo:iUsage;
+  Subestacion_nodo = sprintf('%s%s%s%s%s%s%f',Nodo:cStatName,'/',fold_name,'/',Point_name,'/',Nodo:uknom);
+  Zona_nodo = Nodo:r:cpGrid:b:loc_name;
+  Tension_nodo = Nodo:uknom;
+  Max_v_nodo = Nodo:e:vmax;
+  Min_v_nodo = Nodo:e:vmin;
+  Estado_nodo = Nodo:outserv;
+  fprintf(0,'%f,%s,%s,%s,%f,%f,%f,%f,%f',Numero_nodo,Nombre_nodo,Subestacion_nodo,Zona_nodo,Tipo_nodo,Tension_nodo,Max_v_nodo,Min_v_nodo,Estado_nodo);
+  Numero_nodo = Numero_nodo + 1;
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS LINEAS DEL SISTEMA
+!--------------------------------------------------------------------
+
+Lineas = AllRelevant('*.ElmLne');
+csvName = sprintf('%sLineas.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion_i','Nodo_i','Subestacion_j','Nodo_j','V_nom[kV]','Longitud [km]','R[Ohm/km]','R[pu]','X[Ohm/km]','X[pu]','C[uF/km]','R0[Ohm/km]','X0[Ohm/km]','C0[uF/km]','I_nominal [kA]','Carga_maxima [%]','Fuera_servicio');
+
+for(Linea = Lineas.First();Linea;Linea = Lineas.Next()){
+  Nombre_linea = Linea:loc_name;
+  Nodo_i = Linea.GetNode(0,0);
+  Nodo_j = Linea.GetNode(1,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_linea_i = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_linea_i = Nodo_i:loc_name;
+  
+  fold = Nodo_j:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_j:NodeName;
+  Sub_linea_j = sprintf('%s%s%s%s%s%s%f',Nodo_j:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_j:uknom);
+  Nodo_linea_j = Nodo_j:loc_name;
+  
+  Tension_linea = Nodo_i:uknom;
+  Longitud_linea = Linea:dline;
+  R = (Linea:R1)/Longitud_linea;
+  X = (Linea:X1)/Longitud_linea;
+  C = (Linea:C1)/Longitud_linea;
+  R0 = (Linea:R0)/Longitud_linea;
+  X0 = (Linea:X0)/Longitud_linea;
+  C0 = (Linea:C0)/Longitud_linea;
+  I_nom = Linea:Inom;
+  Estado_linea = Linea:outserv;
+  Max_carga = Linea:maxload;
+  R_pu = Linea:e:rSbasepu;
+  X_pu = Linea:e:xSbasepu;
+  
+  fprintf(0,'%s,%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_linea,Sub_linea_i,Nodo_linea_i,Sub_linea_j,Nodo_linea_j,Tension_linea,Longitud_linea,R,R_pu,X,X_pu,C,R0,X0,C0,I_nom,Max_carga,Estado_linea);
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS REACTORES DEL SISTEMA
+!--------------------------------------------------------------------
+
+Reactores = AllRelevant('*.ElmSind');
+csvName = sprintf('%sReactores.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion_i','Nodo_i','Subestacion_j','Nodo_j','V_nom[kV]','Longitud [km]','R[Ohm/km]','R[pu]','X[Ohm/km]','X[pu]','C[uF/km]','R0[Ohm/km]','X0[Ohm/km]','C0[uF/km]','I_nominal [kA]','Carga_maxima [%]','Fuera_servicio');
+
+for(Reactor = Reactores.First();Reactor;Reactor = Reactores.Next()){
+  Nombre_linea = Reactor:loc_name;
+  Nodo_i = Reactor.GetNode(0,0);
+  Nodo_j = Reactor.GetNode(1,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_linea_i = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_linea_i = Nodo_i:loc_name;
+  
+  fold = Nodo_j:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_j:NodeName;
+  Sub_linea_j = sprintf('%s%s%s%s%s%s%f',Nodo_j:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_j:uknom);
+  Nodo_linea_j = Nodo_j:loc_name;
+  
+  Tension_linea = Nodo_i:uknom;
+  Longitud_linea = 1;
+  R = Reactor:e:rrea;
+  X = Reactor:e:xrea;
+  C = 0;
+  R0 = 0;
+  X0 = 0;
+  C0 = 0;
+  I_nom = Reactor:e:Curn;
+  Estado_linea = 0;
+  Max_carga = Reactor:e:maxload;
+  R_pu = 0;
+  X_pu = 0;
+  
+  fprintf(0,'%s,%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_linea,Sub_linea_i,Nodo_linea_i,Sub_linea_j,Nodo_linea_j,Tension_linea,Longitud_linea,R,R_pu,X,X_pu,C,R0,X0,C0,I_nom,Max_carga,Estado_linea);
+  }
+
+fclose(0);
+
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS DEMANDA DEL SISTEMA
+!--------------------------------------------------------------------
+
+Cargas = AllRelevant('*.ElmLod');
+csvName = sprintf('%sCargas.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion','Nodo','S[MVA]','PF[cos]','P[MW]','Q[MW]');
+
+for(Carga = Cargas.First();Carga;Carga = Cargas.Next()){
+  Nombre_carga = Carga:loc_name;
+  Nodo_i = Carga.GetNode(0,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_carga = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_carga = Nodo_i:loc_name;
+  
+  S_carga = Carga:slini;
+  Pf_carga = Carga:coslini;
+  P_carga = Carga:plini;
+  Q_carga = Carga:qlini;
+  fprintf(0,'%s,%s,%s,%f,%f,%f,%f',Nombre_carga,Sub_carga,Nodo_carga,S_carga,Pf_carga,P_carga,Q_carga); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS GENERADORES ESTATICOS DEL SISTEMA
+!--------------------------------------------------------------------
+
+Generadores_stat = AllRelevant('*.ElmGenstat');
+csvName = sprintf('%sGenstat.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion','Nodo','Tipo','V_nom[kV]','Set_point[pu]','S_nom[MVA]','PF[cos]','P_nom[MW]','P_gen[MW]','Q_gen[MVAr]','P_max[MW]','P_min[MW]','Q_max[MVAr]','Q_min[MVAr]','Fuera_servicio');
+
+
+for(Generador = Generadores_stat.First();Generador;Generador = Generadores_stat.Next()){
+  Nombre_gen = Generador:loc_name;
+  Nodo_i = Generador.GetNode(0,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_gen = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_gen = Nodo_i:loc_name;
+  
+  !Categoria_gen = Generador:e:aCatedory;
+  Categoria_gen = ''; 
+  Tension_nom = Nodo_i:uknom;
+  Set_point = Generador:e:usetp;
+  N_und = Generador:ngnum;
+  S_gen = (Generador:sgn)*N_und;
+  P_nom = (Generador:Pnom)*N_und;
+  Pf_gen = Generador:cosn;
+  P_gen = Generador:pgini;
+  Q_gen = Generador:qgini;
+  P_max = (Generador:e:Pmax_uc)*N_und;
+  P_min = (Generador:e:Pmin_uc)*N_und;
+  Q_max = (P_max*0.3333);
+  Q_min = (-P_max*0.3333);
+  Estado_generador = Generador:outserv;
+  fprintf(0,'%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_gen,Sub_gen,Nodo_gen,Categoria_gen,Tension_nom,Set_point,S_gen,Pf_gen,P_nom,P_gen,Q_gen,P_max,P_min,Q_max,Q_min,Estado_generador); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS GENERADORES SINCRONOS DEL SISTEMA
+!--------------------------------------------------------------------
+
+Generadores = AllRelevant('*.ElmSym');
+csvName = sprintf('%sGen.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion','Nodo','Tipo','V_nom[kV]','Set_point[p.u.]','S_nom[MVA]','PF[cos]','P_nom[MW]','P_gen[MW]','Q_gen[MVAr]','P_max[MW]','P_min[MW]','Q_max[MVAr]','Q_min[MVAr]','Factor_escala','R_sub[p.u]','X_sub[p.u]','Inercia[s]','Slack','Fuera_servicio');
+
+
+for(Generador = Generadores.First();Generador;Generador = Generadores.Next()){
+  Nombre_gen = Generador:loc_name;
+  Nodo_i = Generador.GetNode(0,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_gen = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_gen = Nodo_i:loc_name;
+  !Categoria_gen = Generador:e:aCatedory;
+  
+  Categoria_gen = '';
+  Tension_nom = Generador:t:ugn;
+  Set_point = Generador:e:usetp;
+  N_und = Generador:ngnum;
+  S_gen = (Generador:t:sgn)*N_und;
+  P_nom = (Generador:Pnom)*N_und;
+  Pf_gen = Generador:t:cosn;
+  P_gen = Generador:e:pgini;
+  Q_gen = Generador:e:qgini;
+  P_max = (Generador:e:Pmax_a)*N_und;
+  P_min = (Generador:e:Pmin_a)*N_und;
+  Q_max = (Generador:e:Qmax_a)*N_und;
+  Q_min = (Generador:e:Qmin_a)*N_und;
+  Factor_escala = Generador:pmaxratf;
+  R_sub = Generador:t:rstr;
+  X_sub = Generador:t:xdss;
+  Inercia = Generador:t:h;
+  slack = Generador:ip_ctrl;
+  Estado_generador = Generador:outserv;
+  fprintf(0,'%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_gen,Sub_gen,Nodo_gen,Categoria_gen,Tension_nom,Set_point,S_gen,Pf_gen,P_nom,P_gen,Q_gen,P_max,P_min,Q_max,Q_min,Factor_escala,R_sub,X_sub,Inercia,slack,Estado_generador); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS REDES EXTERNAS DEL SISTEMA
+!--------------------------------------------------------------------
+
+Redes_ext = AllRelevant('*.ElmXnet');
+csvName = sprintf('%sRedext.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion','Nodo','P_max[MW]','P_min[MW]','Q_max[MVAr]','Q_min[MVAr]');
+
+for(Red_ext = Redes_ext.First();Red_ext;Red_ext = Redes_ext.Next()){
+  Nombre_gen = Red_ext:loc_name;
+  Nodo_i = Red_ext.GetNode(0,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_gen = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_gen = Nodo_i:loc_name;
+
+  P_max = 9999;
+  P_min = 0;
+  Q_max = 9999;
+  Q_min = -9999;
+  fprintf(0,'%s,%s,%s,%f,%f,%f,%f',Nombre_gen,Sub_gen,Nodo_gen,P_max,P_min,Q_max,Q_min); 
+  }
+
+fclose(0);
+
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS TRANSFORMADORES BIDEVANADO DEL SISTEMA
+!--------------------------------------------------------------------
+
+Transformadores = AllRelevant('*.ElmTr2');
+csvName = sprintf('%sTrf2.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion_HV','Nodo_HV','Subestacion_LV','Nodo_LV','S_nom[MVA]','HV[kV]','LV[kV]','R[pu]','X[pu]','vkr[%]','vk[%]','Perdidas[kW]','I0[%]','vk0[%]','vkr0[%]','mag0[%]','mag0_rx','si0_hv[%]','shift[deg]','Maxima_carga[%]','Lado_tap','Pos_tap','N_tap','Max_tap','Min_tap','Aum_tap_v','Aum_tap_deg','Fuera_servicio');
+
+for(Transformador = Transformadores.First();Transformador;Transformador = Transformadores.Next()){
+  Nombre_trf = Transformador:loc_name;
+  Nodo_i = Transformador.GetNode(0,0);
+  Nodo_j = Transformador.GetNode(1,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_trf_i = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_trf_i = Nodo_i:loc_name;
+  
+  fold = Nodo_j:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_j:NodeName;
+  Sub_trf_j = sprintf('%s%s%s%s%s%s%f',Nodo_j:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_j:uknom);
+  Nodo_trf_j = Nodo_j:loc_name;
+  
+  S_nom = Transformador:Snom;
+  V_i = Nodo_i:uknom;
+  V_j = Nodo_j:uknom;
+  R_pu = Transformador:t:r1pu;
+  X_pu = Transformador:t:x1pu;
+  Ukr = Transformador:t:uktrr;
+  Uk = Transformador:t:uktr;
+  Perd = Transformador:t:pcutr;
+  I0_per = Transformador:t:curmg;
+  U0k = Transformador:t:uk0tr;
+  U0kr = Transformador:t:ur0tr;
+  mag0 = Transformador:t:zx0hl_n;
+  mag0_rx = Transformador:t:rtox0_n;
+  si0_hv = Transformador:t:zx0hl_h;
+  shift_deg = Transformador:t:nt2ag;
+  tapside = Transformador:t:tap_side;
+  tappos = Transformador:e:nntap;
+  tapneutral = Transformador:t:nntap0;
+  tapmax = Transformador:t:ntpmx;
+  tapmin = Transformador:t:ntpmn;
+  tapstepv = Transformador:t:dutap;
+  tapsteps = Transformador:t:dphitap;
+  Max_carga = Transformador:e:maxload;
+  Estado_trf = Transformador:outserv; 
+  fprintf(0,'%s,%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_trf,Sub_trf_i,Nodo_trf_i,Sub_trf_j,Nodo_trf_j,S_nom,V_i,V_j,R_pu,X_pu,Ukr,Uk,Perd,I0_per,U0k,U0kr,mag0,mag0_rx,si0_hv,shift_deg,Max_carga,tapside,tappos,tapneutral,tapmax,tapmin,tapstepv,tapsteps,Estado_trf); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS TRANSFORMADORES TRIDEVANADO DEL SISTEMA
+!--------------------------------------------------------------------
+
+Transformadores = AllRelevant('*.ElmTr3');
+csvName = sprintf('%sTrf3.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion_HV','Nodo_HV','Subestacion_MV','Nodo_MV','Subestacion_LV','Nodo_LV','HV[kV]','MV[kV]','LV[kV]','R_HV[pu]','R_MV[pu]','R_LV[pu]','X_HV[pu]','X_MV[pu]','X_LV[pu]','S_nom_HV[MVA]','S_nom_MV[MVA]','S_nom_LV[MVA]','Vk_HV[%]','Vk_MV[%]','Vk_LV[%]','Vkr_HV[%]','Vkr_MV[%]','Vkr_LV[%]','Perdidas_HV[kW]','Perdidas_MV[kW]','Perdidas_LV[kW]','Shift_HV[deg]','Shift_MV[deg]','Shift_LV[deg]','Lado_tap','Pos_tap','N_tap','Max_tap','Min_tap','Aum_tap_v','Aum_tap_deg','Fuera_servico');
+
+for(Transformador = Transformadores.First();Transformador;Transformador = Transformadores.Next()){
+  Nombre_trf = Transformador:loc_name;
+  
+  Nodo_i = Transformador.GetNode(0,0);
+  Nodo_j = Transformador.GetNode(1,0);
+  Nodo_k = Transformador.GetNode(2,0);
+  
+  if(Nodo_i <> NULL){
+    fold = Nodo_i:fold_id;
+    fold_name = fold:loc_name;
+    Point_name = Nodo_i:NodeName;
+    Sub_trf_i = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+    Nodo_trf_i = Nodo_i:loc_name;
+    V_i = Nodo_i:uknom;
+    }
+  else{
+    Sub_trf_i = '';
+    Nodo_trf_i = '';
+    V_i = 0;
+    }
+  
+  if(Nodo_j <> NULL){
+    fold = Nodo_j:fold_id;
+    fold_name = fold:loc_name;
+    Point_name = Nodo_j:NodeName;
+    Sub_trf_j = sprintf('%s%s%s%s%s%s%f',Nodo_j:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_j:uknom);
+    Nodo_trf_j = Nodo_j:loc_name;
+    V_j = Nodo_j:uknom;
+    }
+  else{
+    Sub_trf_j = '';
+    Nodo_trf_j = '';
+    V_i = 0;
+    }
+    
+  if(Nodo_k <> NULL){
+    fold = Nodo_k:fold_id;
+    fold_name = fold:loc_name;
+    Point_name = Nodo_k:NodeName;
+    Sub_trf_k = sprintf('%s%s%s%s%s%s%f',Nodo_k:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_k:uknom);
+    Nodo_trf_k = Nodo_k:loc_name;
+    V_k = Nodo_k:uknom;
+    }
+  else{
+    Sub_trf_k = '';
+    Nodo_trf_k = '';
+    V_k = 0;
+    }
+  R_pu_HV = Transformador:t:r1pu_h; 
+  R_pu_MV = Transformador:t:r1pu_m;
+  R_pu_LV = Transformador:t:r1pu_l;
+  X_pu_HV = Transformador:t:x1pu_h;
+  X_pu_MV = Transformador:t:x1pu_m;
+  X_pu_LV = Transformador:t:x1pu_l;
+  S_nom_hv = Transformador:t:strn3_h;
+  S_nom_mv = Transformador:t:strn3_m;
+  S_nom_lv = Transformador:t:strn3_l;
+  Vk_hv = Transformador:t:uktr3_h;
+  Vk_mv = Transformador:t:uktr3_m;
+  Vk_lv = Transformador:t:uktr3_l;
+  Vkr_hv = Transformador:t:uktrr3_h;
+  Vkr_mv = Transformador:t:uktrr3_m;
+  Vkr_lv = Transformador:t:uktrr3_l;
+  pfe_hv = Transformador:t:pcut3_h;
+  pfe_mv = Transformador:t:pcut3_m;
+  pfe_lv = Transformador:t:pcut3_l; 
+  Shift_hv = Transformador:t:nt3ag_h;
+  Shift_mv = Transformador:t:nt3ag_m;
+  Shift_lv = Transformador:t:nt3ag_l;
+  
+  tapside = Transformador:e:ictrlside;
+  
+  tapmax_h = Transformador:t:n3tmx_h;
+  
+  if(tapmax_h <> 0){
+    tappos = Transformador:e:n3tap_h;
+    tapneutral = Transformador:t:n3tp0_h;
+    tapmax = tapmax_h;
+    tapmin = Transformador:t:n3tmn_h;
+    tapstepv = Transformador:t:du3tp_h;
+    tapsteps = Transformador:t:ph3tr_h;
+    }
+  
+  tapmax_m = Transformador:t:n3tmx_m;
+  
+  if(tapmax_m <> 0){
+    tappos = Transformador:e:n3tap_m;
+    tapneutral = Transformador:t:n3tp0_m;
+    tapmax = tapmax_m;
+    tapmin = Transformador:t:n3tmn_m;
+    tapstepv = Transformador:t:du3tp_m;
+    tapsteps = Transformador:t:ph3tr_m;
+    }
+  
+  tapmax_l = Transformador:t:n3tmx_l;
+  
+  if(tapmax_l <> 0){
+    tappos = Transformador:e:n3tap_l;
+    tapneutral = Transformador:t:n3tp0_l;
+    tapmax = tapmax_l;
+    tapmin = Transformador:t:n3tmn_l;
+    tapstepv = Transformador:t:du3tp_l;
+    tapsteps = Transformador:t:ph3tr_l;
+    }
+   
+  
+  
+  Estado_trf = Transformador:outserv;
+  fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f',Nombre_trf,Sub_trf_i,Nodo_trf_i,Sub_trf_j,Nodo_trf_j,Sub_trf_k,Nodo_trf_k,V_i,V_j,V_k,R_pu_HV,R_pu_MV,R_pu_LV,X_pu_HV,X_pu_MV,X_pu_LV,S_nom_hv,S_nom_mv,S_nom_lv,Vk_hv,Vk_mv,Vk_lv,Vkr_hv,Vkr_mv,Vkr_lv,pfe_hv,pfe_mv,pfe_lv,Shift_hv,Shift_mv,Shift_lv,tapside,tappos,tapneutral,tapmax,tapmin,tapstepv,tapsteps,Estado_trf); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS SHUNT DEL SISTEMA
+!--------------------------------------------------------------------
+
+Capacitores = AllRelevant('*.ElmShnt');
+csvName = sprintf('%sShunt.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion','Nodo','Tipo','Vn[kV]','P[MW]','Q[MVAr]','Max_step','Actual_step','Fuera_servicio');
+
+for(Capacitor = Capacitores.First();Capacitor;Capacitor = Capacitores.Next()){
+  
+  Nombre_cap = Capacitor:loc_name;
+  Nodo_i = Capacitor.GetNode(0,0);
+  
+  fold = Nodo_i:fold_id;
+  fold_name = fold:loc_name;
+  Point_name = Nodo_i:NodeName;
+  Sub_cap = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+  Nodo_cap = Nodo_i:loc_name;
+  
+  type_cap = Capacitor:e:shtype;
+  Vn_cap = Nodo_i:uknom;
+  P_cap = 0;
+  Q_cap = Capacitor:Qmax;
+  max_step = Capacitor:ncapx;
+  actual_step = Capacitor:ncapa;
+  Estado_cap = Capacitor:outserv;
+  
+  fprintf(0,'%s,%s,%s,%f,%f,%f,%f,%f,%f,%f',Nombre_cap,Sub_cap,Nodo_cap,type_cap,Vn_cap,P_cap,Q_cap,max_step,actual_step,Estado_cap); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA DE DATOS SWITCHES DEL SISTEMA
+!--------------------------------------------------------------------
+
+Switches = AllRelevant('*.ElmCoup');
+csvName = sprintf('%sSwitches.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s,%s,%s,%s,%s,%s,%s,%s,%s,%s','Nombre','Subestacion_i','Nodo_i','Subestacion_j','Nodo_j','Tipo','Vn[kV]','In[kA]','R[Ohm]','Cerrado');
+
+for(Switch = Switches.First();Switch;Switch = Switches.Next()){
+   
+  Nombre_switch = Switch:loc_name;
+  Nodo_i = Switch.GetNode(0,0);
+  Nodo_j = Switch.GetNode(1,0);
+  
+  if(Nodo_i <> NULL){
+    fold = Nodo_i:fold_id;
+    fold_name = fold:loc_name;
+    Point_name = Nodo_i:NodeName;
+    Sub_switch_i = sprintf('%s%s%s%s%s%s%f',Nodo_i:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_i:uknom);
+    Nodo_switch_i = Nodo_i:loc_name;
+    V_i = Nodo_i:uknom;
+    }
+  else{
+    Sub_switch_i = '';
+    Nodo_switch_i = '';
+    V_i = 0;
+    }
+  
+  if(Nodo_j <> NULL){
+    fold = Nodo_j:fold_id;
+    fold_name = fold:loc_name;
+    Point_name = Nodo_j:NodeName;
+    Sub_switch_j = sprintf('%s%s%s%s%s%s%f',Nodo_j:cStatName,'/',fold_name,'/',Point_name,'/',Nodo_j:uknom);
+    Nodo_switch_j = Nodo_j:loc_name;
+    V_j = Nodo_j:uknom;
+    }
+  else{
+    Sub_switch_j = '';
+    Nodo_switch_j = '';
+    V_i = 0;
+    } 
+  
+  Switch_type = Switch:e:aUsage;
+  Vn_switch = Nodo_i:uknom;
+  In_switch = Switch:Inom;
+  R_switch = 0.0001;
+  Estado_switch = Switch:e:on_off;
+  
+  fprintf(0,'%s,%s,%s,%s,%s,%s,%f,%f,%f,%f',Nombre_switch,Sub_switch_i,Nodo_switch_i,Sub_switch_j,Nodo_switch_j,Switch_type,Vn_switch,In_switch,R_switch,Estado_switch); 
+  }
+
+fclose(0);
+
+!--------------------------------------------------------------------
+!ESCRITURA BANDERA SALIDA
+!--------------------------------------------------------------------
+
+csvName = sprintf('%sFlag_end.txt',Address);
+fopen(csvName,'w',0);
+fprintf(0,'%s','1');
+fclose(0);

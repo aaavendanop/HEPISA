@@ -1,0 +1,1 @@
+Nombre,Subestacion_i,Nodo_i,Subestacion_j,Nodo_j,Tipo,Vn[kV],In[kA],R[Ohm],Cerrado

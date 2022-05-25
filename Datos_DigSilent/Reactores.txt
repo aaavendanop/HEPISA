@@ -1,0 +1,1 @@
+Nombre,Subestacion_i,Nodo_i,Subestacion_j,Nodo_j,V_nom[kV],Longitud [km],R[Ohm/km],R[pu],X[Ohm/km],X[pu],C[uF/km],R0[Ohm/km],X0[Ohm/km],C0[uF/km],I_nominal [kA],Carga_maxima [%],Fuera_servicio

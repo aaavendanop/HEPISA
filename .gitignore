@@ -1,0 +1,8 @@
+.vs/
+.vscode/
+Dockerfile
+Icon?
+__pycache__/
+aa.ipynb
+correr_docker.txt
+kestrel.py

@@ -1,0 +1,1 @@
+Nombre,Subestacion,Nodo,P_max[MW],P_min[MW],Q_max[MVAr],Q_min[MVAr]
