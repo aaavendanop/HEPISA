@@ -1065,51 +1065,39 @@ def dashboard_DLOr(data1):
     def run_dim_size_ReS():
 
         with st.spinner('Descargando información de precios de oferta, disponibilidad de unidades de generación y demanda de energía...'):
-        #     df_disp, df_minop, df_demandaSIN_all, df_ofe, df_MPO_all, df_AGC_all  = get_system_data(dates)
+            df_disp, df_minop, df_demandaSIN_all, df_ofe, df_MPO_all, df_AGC_all  = get_system_data(dates)
 
             actual_path = os.getcwd()
-        #     db_files = os.path.join(actual_path, 'Casos_estudio/loc_size')
+            db_files = os.path.join(actual_path, 'Casos_estudio/loc_size')
 
-        #     despacho_tipo = 'Acorde a disponibilidad Real'
+            despacho_tipo = 'Acorde a disponibilidad Real'
 
-        # with st.spinner('Ejecutando simulación del despacho ideal...'):
-        #     df_PI, tiempo_DI, name_file_DI  = DISC(df_demandaSIN_all, df_disp, df_minop, df_ofe, 1532530, solver)
+        with st.spinner('Ejecutando simulación del despacho ideal...'):
+            df_PI, tiempo_DI, name_file_DI  = DISC(df_demandaSIN_all, df_disp, df_minop, df_ofe, 1532530, solver)
 
         db_files = os.path.join(actual_path, 'Casos_estudio/gen_db.xlsx')
 
-        # with st.spinner('Ejecutando simulación del despacho real...'):
-        #     df_P_size, df_E_size, name_file_DR, tiempo_DR, map_data_2, map_data_1, df_cost_DR, Output_data = DPRLNSC_H(file_system, db_files, df_demandaSIN_all, df_disp, df_minop, despacho_tipo, df_ofe, dates, df_PI, df_MPO_all,
-        #                                                                     Eff, DoD, 0.2, time_sim, vida_util, costP, costE, autoD, BESS_number, BESS_limit, model_sen, solver)
+        with st.spinner('Ejecutando simulación del despacho real...'):
+            df_P_size, df_E_size, name_file_DR, tiempo_DR, map_data_2, map_data_1, df_cost_DR, Output_data = DPRLNSC_H(file_system, db_files, df_demandaSIN_all, df_disp, df_minop, despacho_tipo, df_ofe, dates, df_PI, df_MPO_all,
+                                                                            Eff, DoD, 0.2, time_sim, vida_util, costP, costE, autoD, BESS_number, BESS_limit, model_sen, solver)
 
         ## Impresión de resultados
 
         st.write("Resultados:")
-        # st.write("Tiempo de simulación: " + str(tiempo_DI+tiempo_DR))
+        st.write("Tiempo de simulación: " + str(tiempo_DI+tiempo_DR))
 
         st.write("Nodos en donde se instala SAEB: ")
         dict_result_loc = {}
 
-        # for i in df_P_size.index:
+        for i in df_P_size.index:
 
-        #     result_loc = []
+            result_loc = []
 
-        #     if df_P_size.loc[i] != 0:
+            if df_P_size.loc[i] != 0:
 
-        #         result_loc.append(round(df_P_size.loc[i],1))
-        #         result_loc.append(round(df_E_size.loc[i],1))
-        #         dict_result_loc[i] = result_loc
-
-        ## ----- eliminar -----*
-
-        file_name = 'Resultados/results_David.xlsx'
-
-        df_P_size = pd.read_excel(file_name, sheet_name='P_size', header=0, index_col=0)
-        df_E_size = pd.read_excel(file_name, sheet_name='E_size', header=0, index_col=0)
-        map_data_2 = pd.read_excel(file_name, sheet_name='Branch', header=0, index_col=0)
-        map_data_1 = pd.read_excel(file_name, sheet_name='Bus', header=0, index_col=0)
-        df_cost_DR = pd.read_excel(file_name, sheet_name='cost', header=0, index_col=0)
-
-        ## ----- eliminar -----*
+                result_loc.append(round(df_P_size.loc[i],1))
+                result_loc.append(round(df_E_size.loc[i],1))
+                dict_result_loc[i] = result_loc
 
         df_dict_result_loc = pd.DataFrame.from_dict(dict_result_loc, orient='index', columns=['Potencia [MW]', 'Energía [MWh]'])
         st.dataframe(df_dict_result_loc.style.format(thousands=',', precision=1, decimal='.'))
@@ -1124,33 +1112,17 @@ def dashboard_DLOr(data1):
         point_colors = [0] * df_P_size.shape[0]
 
 
-        # for i in range(df_P_size.shape[0]):
-
-        #     if df_P_size.loc[df_P_size.index[i]] > 0:
-
-        #         point_size[i] = 40000
-        #         point_colors[i] = [10, 230, 10]
-
-        #     else:
-
-        #         point_size[i] = 15000
-        #         point_colors[i] = [230, 158, 10]
-
-        ## ----- eliminar -----*
-
         for i in range(df_P_size.shape[0]):
 
-                if df_P_size.loc[df_P_size.index[i],0] > 0:
+            if df_P_size.loc[df_P_size.index[i]] > 0:
 
-                        point_size[i] = 40000
-                        point_colors[i] = [10, 230, 10]
+                point_size[i] = 40000
+                point_colors[i] = [10, 230, 10]
 
-                else:
+            else:
 
-                        point_size[i] = 15000
-                        point_colors[i] = [230, 158, 10]
-
-        ## ----- eliminar -----*
+                point_size[i] = 15000
+                point_colors[i] = [230, 158, 10]
 
         st.write('#### Mapa de localización de SAE en Colombia')
         st.write('')
