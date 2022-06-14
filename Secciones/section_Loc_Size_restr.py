@@ -23,173 +23,245 @@ from funciones.nuevo_bess import bat_param
 import funciones.pydataxm as pxm
 
 def text_formul_math_deter():
-    return r"""
-    ## **Función Objetivo**
-    $$ \begin{aligned}
-        \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-        \left(p_{i,b,t}^{re}\cdot C_{i}^{gen} + C_{i}^{dn}\cdot SD_{i,t} +
-        C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
-        + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-        + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-        \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
-    \end{aligned}$$
+    st.write("## **Función Objetivo**")
+    st.latex(r"""
+    \begin{equation*}
+        \begin{gathered}
+            \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+            \left(p_{i,b,t}^{re}\cdot C_{i}^{gen} + C_{i}^{dn}\cdot SD_{i,t} +
+            C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
+            + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+            E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+            + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+            \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
+        \end{gathered}
+    \end{equation*}
+    """)
 
-    donde $p_{i,b,t}^{re}$ es la potencia de la simulación del despacho real, en MW, entregada por el generador $i$ en el nodo $b$ en el
-    instante de tiempo $t$; $C_{i}^{gen}$ es un vector que representa los costos de cada unidad de generación en \$/MW;
-    $C_{i}^{dn}\cdot SD_{i,t}$ y $C_{i}^{up}\cdot SU_{i,t}$ representan, respectivamente, los costos de arranque y parada de las unidades de
-    generación; $P_{n,b}^{SAEB}$ es la capacidad de potencia en MW del SAEB $n$ en el nodo $b$; $C_{n}^{pot}$ es el costo del equipo de
-    conversión de potencia en \$/MW; $E_{n}^{SAEB}$ es la capacidad de energía del SAEB en MWh; $C_{n,b}^{ene}$ es el costo de los equipos de
-    almacenamiento en \$/MWh; $p_{i,d,t}^{id}$ es la potencia que resulta del despacho ideal, en MW, entregada por el generador $i$ en el
-    nodo $b$ en el instante de tiempo $t$. Finalmente, $C_{t}^{MPO}$ es el máximo precio de oferta en el instante de tiempo $t$.
-    ## **Restricciones**
+    st.write(r"""
+    donde $p_{i,b,t}^{re}$ es la potencia de la simulación del despacho real, en MW, entregada por el generador $i$ en el nodo $b$
+    en el instante de tiempo $t$; $C_{i}^{gen}$ es un vector que representa los costos de cada unidad de generación en \$/MW;
+    $C_{i}^{dn}\cdot SD_{i,t}$ y $C_{i}^{up}\cdot SU_{i,t}$ representan, respectivamente, los costos de arranque y parada de las
+    unidades de generación; $P_{n,b}^{SAEB}$ es la capacidad de potencia en MW del SAEB $n$ en el nodo $b$; $C_{n}^{pot}$ es el costo
+    del equipo de conversión de potencia en \$/MW; $E_{n}^{SAEB}$ es la capacidad de energía del SAEB en MWh; $C_{n,b}^{ene}$ es el
+    costo de los equipos de almacenamiento en \$/MWh; $p_{i,d,t}^{id}$ es la potencia que resulta del despacho ideal, en MW,
+    entregada por el generador $i$ en el nodo $b$ en el instante de tiempo $t$. Finalmente, $C_{t}^{MPO}$ es el máximo precio de
+    oferta en el instante de tiempo $t$.
+    """)
 
-    ### Restricciones del sistema
+    st.write("## **Restricciones**")
 
-    **Balance de Potencia**
+    st.write("#### Restricciones del sistema")
 
-    $$ \begin{aligned}
+    st.write("**Balance de Potencia**")
+
+    st.latex(r"""
+    \begin{aligned}
         \sum_{i \in \mathcal{I}_{b}} p_{i,b,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
         \left(p_{b,r,t}^{pf} + \frac{1}{2} q_{b,r,t}^{pf} \right) + \sum_{n \in \mathcal{N}_{b}}
-        \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \hspace{2mm} \forall
+        \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \quad \forall
         b \in \mathcal{B}, t \in \mathcal{T}
-    \end{aligned}$$
+    \end{aligned}
+    """)
 
+    st.write(r"""
     donde $p_{b,r,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ en cada instante de tiempo $t$;
     $q_{b,r,t}^{pf}$ son las pérdidas de potencia asociadas a cada línea conectada entre los nodos $b$ y $r$ en cada instante de tiempo $t$;
     $p_{n,b,t}^{dc}$ es la potencia de carga del SAEB $n$ conectado al nodo $b$ en el instante de tiempo $t$; $p_{n,b,t}^{ch}$ es la potencia
     de descarga del SAEB $n$ conectado al nodo $b$ en el instante de tiempo $t$; $D_{b,t}^{r}$ la demanda real del sistema del día estudiado.
+    """)
 
-    ### Límites en Generación
+    st.write("#### Límites en Generación")
 
-    $$ P_{i}^{min} \leq p_{i,b,t}^{re} \leq P_{i}^{max} \hspace{2mm} \forall
-    t \in \mathcal{T}, i \in \mathcal{I}, b \in \mathcal{B} $$
+    st.latex(r"""
+    P_{i}^{min} \leq p_{i,b,t}^{re} \leq P_{i}^{max} \quad \forall
+    t \in \mathcal{T}, i \in \mathcal{I}, b \in \mathcal{B}
+    """)
 
+    st.write(r"""
     donde $P_{i}^{min}$ y $P_{i}^{max}$ son los límites mínimos y máximos de la capacidad de generación térmica, respectivamente.
+    """)
 
-    ### Generadores Térmicos
+    st.write("#### Generadores Térmicos")
+    st.write("**Rampas de generadores térmicos**")
 
-    **Rampas de generadores térmicos**
+    st.latex(r"""
+    p_{i,t+1}^{re} - p_{i,t}^{re} \leq R_{i}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i}^{min} \quad
+    \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    $$ p_{i,t+1}^{re} - p_{i,t}^{re} \leq R_{i}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i}^{min} \hspace{2mm}
-    \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I} $$
+    st.latex(r"""
+    p_{i,t}^{re} - p_{i,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i}^{min} \quad
+    \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    $$ p_{i,t}^{re} - p_{i,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i}^{min} \hspace{2mm}
-    \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I} $$
-
+    st.write(r"""
     donde $R_{i}^{up}$ y $R_{i}^{dn}$ son las rampas de potencia de subida y bajada de las unidades de generación térmica, respectivamente;
     $SU_{i,t+1}$ y $SD_{i,t+1}$ son las señales de encendido y apagado de las unidades térmicas, respectivamente; $x_{i,t}$ representa el
     estado programado para las unidades de generación térmica.
+    """)
 
-    **Variables binarias de operación de unidades térmicas**
+    st.write("**Variables binarias de operación de unidades térmicas**")
 
-    $$ SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \hspace{2mm} \forall
-    t \in \mathcal{T}, i \in \mathcal{I} $$
+    st.latex(r"""
+    SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \quad \forall
+    t \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    $$ SU_{i,t} + SD_{i,t} \leq 1 \hspace{2mm} \forall
-    t \in \mathcal{T}, i \in \mathcal{I} $$
+    st.latex(r"""
+    SU_{i,t} + SD_{i,t} \leq 1 \quad \forall
+    t \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    ### Flujo de potencia DC y pérdidas
-    **Cálculo del flujo de potencia por cada línea**
+    st.write("#### Flujo de potencia DC y pérdidas")
+    st.write("**Cálculo del flujo de potencia por cada línea**")
 
-    $$ p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \hspace{2mm} \forall
-    (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \quad \forall
+    (b,r) \in \mathcal{L}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b}$ y $\delta_{r}$ representan el
     valor del ángulo de los nodos que son conectados por la línea, ángulo de salida y de llegada, respectivamente.
+    """)
 
-    **Cálculo de las pérdidas eléctricas de cada línea**
+    st.write("**Cálculo de las pérdidas eléctricas de cada línea**")
 
-    $$ q_{b,r,t}^{pf} = G_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right)^2 \hspace{2mm}
-    \forall (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+    st.latex(r"""
+    q_{b,r,t}^{pf} = G_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right)^2 \quad
+    \forall (b,r) \in \mathcal{L}, t \in \mathcal{T}
+    """)
 
-    $$ \delta_{b,r}^{+} + \delta_{b,r}^{-} = \sum_{k=1}^{K} \delta_{b,r}(k)
-    \hspace{2mm} k = 1,...,K $$
+    st.latex(r"""
+    \delta_{b,r}^{+} + \delta_{b,r}^{-} = \sum_{k=1}^{K} \delta_{b,r}(k)
+    \quad k = 1,...,K
+    """)
 
-    $$ \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \hspace{2mm}
-    k = 1, ... , K $$
+    st.latex(r"""
+    \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \quad
+    k = 1, ... , K
+    """)
 
-    $$ q_{b,r,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r}(k)
-    \hspace{2mm} \forall (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+    st.latex(r"""
+    q_{b,r,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r}(k)
+    \quad \forall (b,r) \in \mathcal{L}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $G_{b,r}$ es la conductancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,r}^{+}$ y $\delta_{b,r}^{-}$ son
     variables utilizadas para representar el cálculo lineal del valor absoluto dentro del modelo matemático; $\alpha_{b,r}(k)$ y $\delta_{b,r}(k)$
     representan la pendiente y el valor del bloque de linealización de la diferencia angular $\left(\delta_{b} - \delta_{r} \right)$,
     respectivamente; $\Delta \delta_{b,r}$ representa el valor máximo que puede tomar la diferencia angular $\left(\delta_{b} - \delta_{r} \right)$.
+    """)
 
-    **Límites en el flujo de potencia en las líneas**
+    st.write("**Límites en el flujo de potencia en las líneas**")
 
-    $$ -P_{b,r}^{max} \leq p_{b,r,t}^{pf} + \frac{1}{2} \cdot q_{b,r,t}^{pf} \leq P_{b,r}^{max}
-    \hspace{2mm} \forall l \in \mathcal{L}, t \in \mathcal{T} $$
+    st.latex(r"""
+    -P_{b,r}^{max} \leq p_{b,r,t}^{pf} + \frac{1}{2} \cdot q_{b,r,t}^{pf} \leq P_{b,r}^{max}
+    \quad \forall l \in \mathcal{L}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
     que conecta los nodos $b$ y $r$.
+    """)
 
-    ### Restricciones sistemas de almacenamiento de energía basados en baterías
+    st.write("#### Restricciones sistemas de almacenamiento de energía basados en baterías")
 
-    **Relación entre la potencia y energía de los SAEB**
+    st.write("**Relación entre la potencia y energía de los SAEB**")
 
-    $$ e_{n,b,t} = e_{n,b,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,t}^{ch} -
-    \frac{P_{n,b,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \hspace{2mm} \forall
-    b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T} \hspace{10mm} $$
+    st.latex(r"""
+    e_{n,b,t} = e_{n,b,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,t}^{ch} -
+    \frac{P_{n,b,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \quad \forall
+    b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $e_{n,b,t}$ es la cantidad de energía actual del SAEB; $e_{n,b,t-1}$ es la cantidad de energía en el periodo anterior del SAEB;
     $p_{n,b,t}^{ch}$ es la potencia de carga del SAEB; $\eta^{ch}_{n}$ es la eficiencia de carga del SAEB; $P_{n,b,t}^{dc}$ es la potencia de descarga
     del SAEB; $\eta^{dc}_{n}$ es la eficiencia de carga del SAEB.
+    """)
 
-    **Límite de energía de los SAEB**
+    st.write("**Límite de energía de los SAEB**")
 
-    $$ e_{n,b,t} \leq E_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    e_{n,b,t} \leq E_{n,b}^{SAEB} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $E_{n,b}^{SAEB}$ es la capacidad energética nominal del SAEB y constituye una variable de decisión que determina el tamaño del SAEB
     a instalar en términos de energía.
+    """)
 
-    **Límite de potencia de los SAEB**
+    st.write("**Límite de potencia de los SAEB**")
 
-    $$ p_{n,b,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,t}^{ch} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,t}^{ch} \leq P_{n,b}^{SAEB} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,t}^{dc} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,t}^{dc} \leq P_{n,b}^{SAEB} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $Z$ es un valor constante muy grande; $u_{n,b,t}^{sta}$ es una variable binaria que modela el comportamiento del SAEB $n$
     instalado en el nodo $b$ en cada instante de tiempo $t$; $u_{n,b}^{ins}$ es una variable binaria que determina si el SAEB $n$ es instalado
     en el nodo $b$.
+    """)
 
-    **Limite en el número de SAEB que se instalan**
+    st.write("**Limite en el número de SAEB que se instalan**")
 
-    $$ u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N}, b \in \mathcal{B},
-    t \in \mathcal{T} $$
+    st.latex(r"""
+    u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B},
+    t \in \mathcal{T}
+    """)
 
-    $$ E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N},
-    b \in \mathcal{B}$$
+    st.latex(r"""
+    E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \quad \forall n \in \mathcal{N},
+    b \in \mathcal{B}
+    """)
 
-    $$ \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \hspace{2mm} \forall n \in \mathcal{N},
-    b \in \mathcal{B} $$
+    st.latex(r"""
+    \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \quad \forall n \in \mathcal{N},
+    b \in \mathcal{B}
+    """)
 
+    st.write(r"""
     donde $N_{max}$ es el número máximo de SAEB que se pueden instalar.
+    """)
+    return ""
 
-    """
 
 def text_formul_math_escen():
-    return r"""
-    ## **Función Objetivo**
-    $$ \begin{aligned}
-        \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-        \left(C_{i}^{dn}\cdot SD_{i,t} + C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}arranque/parada} \\
-        + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-        + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-        \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
-    \end{aligned}$$
+    st.write("## **Función Objetivo**")
+    st.latex(r"""
+    \begin{equation*}
+        \begin{gathered}
+            \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+            \left(C_{i}^{dn}\cdot SD_{i,t} + C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}arranque/parada} \\
+            + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+            E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+            + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+            \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
+        \end{gathered}
+    \end{equation*}
+    """)
 
+    st.write(r"""
     donde $C_{i}^{gen}$ es un vector que representa los costos de cada unidad de generación en \$/MW; $C_{i}^{dn}\cdot SD_{i,t}$ y
     $C_{i}^{up}\cdot SU_{i,t}$ representan, respectivamente, los costos de arranque y parada de las unidades de generación; $P_{n,b}^{SAEB}$
     es la capacidad de potencia en MW del SAEB $n$ en el nodo $b$; $C_{n}^{pot}$ es el costo del equipo de conversión de potencia en \$/MW;
@@ -198,159 +270,219 @@ def text_formul_math_escen():
     en MW, entregada por el generador $i$ en el nodo $b$ para el escenario $s$ en el instante de tiempo $t$; $p_{i,s,d,t}^{id}$ es la potencia
     que resulta del despacho ideal, en MW, entregada por el generador $i$ en el nodo $b$ para el escenario $s$ en el instante de tiempo $t$.
     Finalmente, $C_{t}^{MPO}$ es el máximo precio de oferta en el instante de tiempo $t$.
+    """)
 
-    ## **Restricciones**
+    st.write("## **Restricciones**")
+    st.write("#### Restricciones del sistema")
 
-    ### Restricciones del sistema
+    st.write("**Balance de Potencia**")
 
-    **Balance de Potencia**
+    st.latex(r"""
+    \begin{equation}
+        \begin{gathered}
+            \sum_{i \in \mathcal{I}_{b}} p_{i,b,s,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
+            \left(p_{b,r,s,t}^{pf} + \frac{1}{2} q_{b,r,s,t}^{pf} \right) \\ + \sum_{n \in \mathcal{N}_{b}}
+            \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \quad \forall
+            b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
+        \end{gathered}
+    \end{equation}
+    """)
 
-    $$ \begin{aligned}
-        \sum_{i \in \mathcal{I}_{b}} p_{i,b,s,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
-        \left(p_{b,r,s,t}^{pf} + \frac{1}{2} q_{b,r,s,t}^{pf} \right) + \\ \sum_{n \in \mathcal{N}_{b}}
-        \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \hspace{2mm} \forall
-        b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
-    \end{aligned}$$
-
+    st.write(r"""
     donde $p_{b,r,s,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ para el escenario $s$ en cada
     instante de tiempo $t$; $q_{b,r,s,t}^{pf}$ son las pérdidas de potencia asociadas a cada línea conectada entre los nodos $b$ y $r$ para
     el escenario $s$ en cada instante de tiempo $t$; $p_{n,b,s,t}^{dc}$ es la potencia de carga del SAEB $n$ conectado al nodo $b$ para el
     escenario $s$ en el instante de tiempo $t$; $p_{n,b,s,t}^{ch}$ es la potencia de descarga del SAEB $n$ conectado al nodo $b$ para el
     escenario $s$ en el instante de tiempo $t$; $D_{b,s,t}^{r}$ la demanda real del sistema del día estudiado.
+    """)
 
-    ### Límites en Generación
+    st.write("#### Límites en Generación")
 
-    $$ P_{i,s}^{min} \leq p_{i,b,s,t}^{re} \leq P_{i,s}^{max} \hspace{2mm} \forall
-    i \in \mathcal{I}, b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+    P_{i,s}^{min} \leq p_{i,b,s,t}^{re} \leq P_{i,s}^{max} \quad \forall
+    i \in \mathcal{I}, b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $P_{i,s}^{min}$ y $P_{i,s}^{max}$ son los límites mínimos y máximos de la capacidad de generación térmica, respectivamente.
+    """)
 
-    ### Generadores Térmicos
+    st.write("#### Generadores Térmicos")
+    st.write("**Rampas de generadores térmicos**")
 
-    **Rampas de generadores térmicos**
+    st.latex(r"""
+    p_{i,s,t+1}^{re} - p_{i,s,t}^{re} \leq R_{i,s}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i,s}^{min} \quad
+    \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I}
+    """)
 
-    $$ p_{i,s,t+1}^{re} - p_{i,s,t}^{re} \leq R_{i,s}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i,s}^{min} \hspace{2mm}
-    \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I} $$
+    st.latex(r"""
+    p_{i,s,t}^{re} - p_{i,s,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i,s}^{min} \quad
+    \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I}
+    """)
 
-    $$ p_{i,s,t}^{re} - p_{i,s,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i,s}^{min} \hspace{2mm}
-    \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I} $$
-
+    st.write(r"""
     donde $R_{i}^{up}$ y $R_{i}^{dn}$ son las rampas de potencia de subida y bajada de las unidades de generación térmica, respectivamente;
     $SU_{i,t+1}$ y $SD_{i,t+1}$ son las señales de encendido y apagado de las unidades térmicas, respectivamente; $x_{i,t}$ representa el
     estado programado para las unidades de generación térmica.
+    """)
 
-    **Variables binarias de operación de unidades térmicas**
+    st.write("**Variables binarias de operación de unidades térmicas**")
 
-    $$ SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \hspace{2mm} \forall
-    t \in \mathcal{T}, i \in \mathcal{I} $$
+    st.latex(r"""
+    SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \quad \forall
+    t \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    $$ SU_{i,t} + SD_{i,t} \leq 1 \hspace{2mm} \forall
-    t \in \mathcal{T}, i \in \mathcal{I} $$
+    st.latex(r"""
+    SU_{i,t} + SD_{i,t} \leq 1 \quad \forall
+    t \in \mathcal{T}, i \in \mathcal{I}
+    """)
 
-    ### Flujo de potencia DC y pérdidas
-    **Cálculo del flujo de potencia por cada línea**
+    st.write("#### Flujo de potencia DC y pérdidas")
+    st.write("**Cálculo del flujo de potencia por cada línea**")
 
-    $$ p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \hspace{2mm} \forall
-    (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \quad \forall
+    (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,s}$ y $\delta_{r,s}$ representan el
     valor del ángulo de los nodos que son conectados por la línea, ángulo de salida y de llegada para el escenario $s$, respectivamente.
+    """)
 
-    **Cálculo de las pérdidas eléctricas de cada línea**
+    st.write("**Cálculo de las pérdidas eléctricas de cada línea**")
 
-    $$ q_{b,r,s,t}^{pf} = G_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right)^2 \hspace{2mm}
-    \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+    q_{b,r,s,t}^{pf} = G_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right)^2 \quad
+    \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
+    """)
 
-    $$ \delta_{b,r,s}^{+} + \delta_{b,r,s}^{-} = \sum_{k=1}^{K} \delta_{b,r,s}(k)
-    \hspace{2mm} k = 1,...,K $$
+    st.latex(r"""
+    \delta_{b,r,s}^{+} + \delta_{b,r,s}^{-} = \sum_{k=1}^{K} \delta_{b,r,s}(k)
+    \quad k = 1,...,K
+    """)
 
-    $$ \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \hspace{2mm}
-    k = 1, ... , K $$
+    st.latex(r"""
+    \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \quad
+    k = 1, ... , K
+    """)
 
-    $$ q_{b,r,s,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r,s}(k)
-    \hspace{2mm} \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+    q_{b,r,s,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r,s}(k)
+    \quad \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $G_{b,r}$ es la conductancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,r,s}^{+}$ y $\delta_{b,r,s}^{-}$ son
     variables utilizadas para representar el cálculo lineal del valor absoluto dentro del modelo matemático; $\alpha_{b,r}(k)$ y $\delta_{b,r,s}(k)$
     representan la pendiente y el valor del bloque de linealización de la diferencia angular $\left(\delta_{b,s} - \delta_{r,s} \right)$,
     respectivamente; $\Delta \delta_{b,r}$ representa el valor máximo que puede tomar la diferencia angular $\left(\delta_{b,s} - \delta_{r,s} \right)$.
+    """)
 
-    **Límites en el flujo de potencia en las líneas**
+    st.write("*Límites en el flujo de potencia en las líneas**")
 
-    $$ -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} + \frac{1}{2} \cdot q_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
-    \hspace{2mm} \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+    -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} + \frac{1}{2} \cdot q_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
+    \quad \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
     que conecta los nodos $b$ y $r$.
+    """)
 
-    ### Restricciones sistemas de almacenamiento de energía basados en baterías
+    st.write("#### Restricciones sistemas de almacenamiento de energía basados en baterías")
+    st.write("**Relación entre la potencia y energía de los SAEB**")
 
-    **Relación entre la potencia y energía de los SAEB**
+    st.latex(r"""
+    e_{n,b,s,t} = e_{n,b,s,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,s,t}^{ch} -
+    \frac{P_{n,b,s,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \quad \forall
+    b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T}
+    """)
 
-    $$ e_{n,b,s,t} = e_{n,b,s,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,s,t}^{ch} -
-    \frac{P_{n,b,s,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \hspace{2mm} \forall
-    b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T} \hspace{10mm} $$
-
+    st.write(r"""
     donde $e_{n,b,s,t}$ es la cantidad de energía actual del SAEB; $e_{n,b,s,t-1}$ es la cantidad de energía en el periodo anterior del SAEB;
     $p_{n,b,s,t}^{ch}$ es la potencia de carga del SAEB; $\eta^{ch}_{n}$ es la eficiencia de carga del SAEB; $P_{n,b,s,t}^{dc}$ es la potencia de descarga
     del SAEB; $\eta^{dc}_{n}$ es la eficiencia de carga del SAEB.
+    """)
 
-    **Límite de energía de los SAEB**
+    st.write("**Límite de energía de los SAEB**")
 
-    $$ e_{n,b,s,t} \leq E_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    e_{n,b,s,t} \leq E_{n,b}^{SAEB} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $E_{n,b}^{SAEB}$ es la capacidad energética nominal del SAEB y constituye una variable de decisión que determina el tamaño del SAEB
     a instalar en términos de energía.
+    """)
 
-    **Límite de potencia de los SAEB**
+    st.write("**Límite de potencia de los SAEB**")
 
-    $$ p_{n,b,s,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,s,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,s,t}^{ch} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,s,t}^{ch} \leq P_{n,b}^{SAEB} \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,s,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,s,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \quad \forall
+    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ p_{n,b,s,t}^{dc} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-    n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+    p_{n,b,s,t}^{dc} \leq P_{n,b}^{SAEB} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
+    st.write(r"""
     donde $Z$ es un valor constante muy grande; $u_{n,b,t}^{sta}$ es una variable binaria que modela el comportamiento del SAEB $n$
     instalado en el nodo $b$ en cada instante de tiempo $t$; $u_{n,b}^{ins}$ es una variable binaria que determina si el SAEB $n$ es instalado
     en el nodo $b$.
+    """)
 
-    **Limite en el número de SAEB que se instalan**
+    st.write("**Limite en el número de SAEB que se instalan**")
 
-    $$ u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N}, b \in \mathcal{B},
-    t \in \mathcal{T} $$
+    st.latex(r"""
+    u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
+    """)
 
-    $$ E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N},
-    b \in \mathcal{B}$$
+    st.latex(r"""
+    E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
+    """)
 
-    $$ \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \hspace{2mm} \forall n \in \mathcal{N},
-    b \in \mathcal{B} $$
+    st.latex(r"""
+    \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
+    """)
 
+    st.write(r"""
     donde $N_{max}$ es el número máximo de SAEB que se pueden instalar.
+    """)
+    return ""
 
-    """
 
 def text_formul_math_deter_sen(res_list):
 
     if 'Operación de unidades térmicas detallada (rampas, Tiempos mínimos de encendido/apagado)' in res_list:
 
         st.write("## **Función Objetivo**")
-        st.write(r"""
-                $$ \begin{aligned}
-                    \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(p_{i,b,t}^{re}\cdot C_{i}^{gen} + C_{i}^{dn}\cdot SD_{i,t} +
-                    C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
-                    + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-                    E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-                    + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
-                \end{aligned}$$
+        st.latex(r"""
+                \begin{equation*}
+                    \begin{gathered}
+                        \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(p_{i,b,t}^{re}\cdot C_{i}^{gen} + C_{i}^{dn}\cdot SD_{i,t} +
+                        C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
+                        + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+                        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+                        + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
+                    \end{gathered}
+                \end{equation*}
                 """)
         st.write(r"""
                 donde $p_{i,b,t}^{re}$ es la potencia de la simulación del despacho real, en MW, entregada por el generador $i$ en el nodo $b$ en el
@@ -365,15 +497,17 @@ def text_formul_math_deter_sen(res_list):
     else:
 
         st.write("## **Función Objetivo**")
-        st.write(r"""
-                $$ \begin{aligned}
-                    \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(p_{i,b,t}^{re}\cdot C_{i}^{gen}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
-                    + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-                    E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-                    + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
-                \end{aligned}$$
+        st.latex(r"""
+                \begin{equation*}
+                    \begin{gathered}
+                        \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(p_{i,b,t}^{re}\cdot C_{i}^{gen}\right)}_{Costos\hspace{1mm}de\hspace{1mm}generación} \\
+                        + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+                        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+                        + \underbrace{\sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(\left(p_{i,b,t}^{re} - p_{i,d,t}^{id} \right)\cdot C_{t}^{MPO} \right)}_{Penalización} \\
+                    \end{gathered}
+                \end{equation*}
                 """)
         st.write(r"""
                 donde $p_{i,b,t}^{re}$ es la potencia de la simulación del despacho real, en MW, entregada por el generador $i$ en el nodo $b$ en el
@@ -392,13 +526,13 @@ def text_formul_math_deter_sen(res_list):
     st.write('**Balance de potencia**')
 
     if 'Pérdidas' in res_list:
-        st.write(r"""
-                $$ \begin{aligned}
+        st.latex(r"""
+                \begin{aligned}
                     \sum_{i \in \mathcal{I}_{b}} p_{i,b,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
                     \left(p_{b,r,t}^{pf} + \frac{1}{2} q_{b,r,t}^{pf} \right) + \sum_{n \in \mathcal{N}_{b}}
-                    \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \hspace{2mm} \forall
+                    \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \quad \forall
                     b \in \mathcal{B}, t \in \mathcal{T}
-                \end{aligned}$$
+                \end{aligned}
                 """)
         st.write(r"""
                 donde $p_{b,r,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ en cada instante de tiempo $t$;
@@ -407,13 +541,13 @@ def text_formul_math_deter_sen(res_list):
                 de descarga del SAEB $n$ conectado al nodo $b$ en el instante de tiempo $t$; $D_{b,t}^{r}$ la demanda real del sistema del día estudiado.
                 """)
     else:
-        st.write(r"""
-                $$ \begin{aligned}
+        st.latex(r"""
+                \begin{aligned}
                     \sum_{i \in \mathcal{I}_{b}} p_{i,b,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
                     p_{b,r,t}^{pf} + \sum_{n \in \mathcal{N}_{b}}
-                    \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \hspace{2mm} \forall
+                    \left(p_{n,b,t}^{dc} - p_{n,b,t}^{ch} \right) = D_{b,t}^{r} \quad \forall
                     b \in \mathcal{B}, t \in \mathcal{T}
-                \end{aligned}$$
+                \end{aligned}
                 """)
         st.write(r"""
                 donde $p_{b,r,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ en cada instante de tiempo $t$;
@@ -422,9 +556,9 @@ def text_formul_math_deter_sen(res_list):
                 """)
 
     st.write("### Límites en Generación")
-    st.write(r"""
-            $$ P_{i}^{min} \leq p_{i,b,t}^{re} \leq P_{i}^{max} \hspace{2mm} \forall
-            t \in \mathcal{T}, i \in \mathcal{I}, b \in \mathcal{B} $$
+    st.latex(r"""
+            P_{i}^{min} \leq p_{i,b,t}^{re} \leq P_{i}^{max} \quad \forall
+            t \in \mathcal{T}, i \in \mathcal{I}, b \in \mathcal{B}
             """)
     st.write(r"""
             donde $P_{i}^{min}$ y $P_{i}^{max}$ son los límites mínimos y máximos de la capacidad de generación térmica, respectivamente.
@@ -434,13 +568,13 @@ def text_formul_math_deter_sen(res_list):
 
         st.write("### Operación de Generadores Térmicos")
         st.write("**Rampas de generadores térmicos**")
-        st.write(r"""
-                $$ p_{i,t+1}^{re} - p_{i,t}^{re} \leq R_{i}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i}^{min} \hspace{2mm}
-                \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                p_{i,t+1}^{re} - p_{i,t}^{re} \leq R_{i}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i}^{min} \quad
+                \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I}
                 """)
-        st.write(r"""
-                $$ p_{i,t}^{re} - p_{i,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i}^{min} \hspace{2mm}
-                \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                p_{i,t}^{re} - p_{i,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i}^{min} \quad
+                \forall t, t + 1 \in \mathcal{T}, i \in \mathcal{I}
                 """)
         st.write(r"""
                 donde $R_{i}^{up}$ y $R_{i}^{dn}$ son las rampas de potencia de subida y bajada de las unidades de generación térmica, respectivamente;
@@ -449,21 +583,21 @@ def text_formul_math_deter_sen(res_list):
                 """)
 
         st.write("**Variables binarias de operación de unidades térmicas**")
-        st.write(r"""
-                $$ SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \hspace{2mm} \forall
-                t \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \quad \forall
+                t \in \mathcal{T}, i \in \mathcal{I}
                 """)
-        st.write(r"""
-                $$ SU_{i,t} + SD_{i,t} \leq 1 \hspace{2mm} \forall
-                t \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                SU_{i,t} + SD_{i,t} \leq 1 \quad \forall
+                t \in \mathcal{T}, i \in \mathcal{I}
                 """)
 
     if 'Pérdidas' in res_list:
         st.write("### Flujo de potencia DC y pérdidas")
         st.write("**Cálculo del flujo de potencia por cada línea**")
-        st.write(r"""
-                $$ p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \hspace{2mm} \forall
-                (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \quad \forall
+                (b,r) \in \mathcal{L}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b}$ y $\delta_{r}$ representan el
@@ -471,21 +605,21 @@ def text_formul_math_deter_sen(res_list):
                 """)
 
         st.write("**Cálculo de las pérdidas eléctricas de cada línea**")
-        st.write(r"""
-                $$ q_{b,r,t}^{pf} = G_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right)^2 \hspace{2mm}
-                \forall (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                q_{b,r,t}^{pf} = G_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right)^2 \quad
+                \forall (b,r) \in \mathcal{L}, t \in \mathcal{T}
                 """)
-        st.write(r"""
-                $$ \delta_{b,r}^{+} + \delta_{b,r}^{-} = \sum_{k=1}^{K} \delta_{b,r}(k)
-                \hspace{2mm} k = 1,...,K $$
+        st.latex(r"""
+                \delta_{b,r}^{+} + \delta_{b,r}^{-} = \sum_{k=1}^{K} \delta_{b,r}(k)
+                \quad k = 1,...,K
                 """)
-        st.write(r"""
-                $$ \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \hspace{2mm}
-                k = 1, ... , K $$
+        st.latex(r"""
+                \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \quad
+                k = 1, ... , K
                 """)
-        st.write(r"""
-                $$ q_{b,r,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r}(k)
-                \hspace{2mm} \forall (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                q_{b,r,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r}(k)
+                \quad \forall (b,r) \in \mathcal{L}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $G_{b,r}$ es la conductancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,r}^{+}$ y $\delta_{b,r}^{-}$ son
@@ -495,9 +629,9 @@ def text_formul_math_deter_sen(res_list):
                 """)
 
         st.write("**Límites en el flujo de potencia en las líneas**")
-        st.write(r"""
-                $$ -P_{b,r}^{max} \leq p_{b,r,t}^{pf} + \frac{1}{2} \cdot q_{b,r,t}^{pf} \leq P_{b,r}^{max}
-                \hspace{2mm} \forall l \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                -P_{b,r}^{max} \leq p_{b,r,t}^{pf} + \frac{1}{2} \cdot q_{b,r,t}^{pf} \leq P_{b,r}^{max}
+                \quad \forall l \in \mathcal{L}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
@@ -506,9 +640,9 @@ def text_formul_math_deter_sen(res_list):
     else:
         st.write("### Flujo de potencia DC")
         st.write("**Cálculo del flujo de potencia por cada línea**")
-        st.write(r"""
-                $$ p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \hspace{2mm} \forall
-                (b,r) \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                p_{b,r,t}^{pf} = B_{b,r} \cdot \left(\delta_{b} - \delta_{r} \right) \quad \forall
+                (b,r) \in \mathcal{L}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b}$ y $\delta_{r}$ representan el
@@ -516,9 +650,8 @@ def text_formul_math_deter_sen(res_list):
                 """)
 
         st.write("**Límites en el flujo de potencia en las líneas**")
-        st.write(r"""
-                $$ -P_{b,r}^{max} \leq p_{b,r,t}^{pf} \leq P_{b,r}^{max}
-                \hspace{2mm} \forall l \in \mathcal{L}, t \in \mathcal{T} $$
+        st.latex(r"""
+                -P_{b,r}^{max} \leq p_{b,r,t}^{pf} \leq P_{b,r}^{max} \quad \forall l \in \mathcal{L}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
@@ -527,10 +660,10 @@ def text_formul_math_deter_sen(res_list):
 
     st.write("### Restricciones sistemas de almacenamiento de energía basados en baterías")
     st.write("**Relación entre la potencia y energía de los SAEB**")
-    st.write(r"""
-            $$ e_{n,b,t} = e_{n,b,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,t}^{ch} -
-            \frac{P_{n,b,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \hspace{2mm} \forall
-            b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T} \hspace{10mm} $$
+    st.latex(r"""
+            e_{n,b,t} = e_{n,b,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,t}^{ch} -
+            \frac{P_{n,b,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \quad \forall
+            b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $e_{n,b,t}$ es la cantidad de energía actual del SAEB; $e_{n,b,t-1}$ es la cantidad de energía en el periodo anterior del SAEB;
@@ -539,9 +672,8 @@ def text_formul_math_deter_sen(res_list):
             """)
 
     st.write("**Límite de energía de los SAEB**")
-    st.write(r"""
-            $$ e_{n,b,t} \leq E_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            e_{n,b,t} \leq E_{n,b}^{SAEB} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $E_{n,b}^{SAEB}$ es la capacidad energética nominal del SAEB y constituye una variable de decisión que determina el tamaño del SAEB
@@ -549,21 +681,21 @@ def text_formul_math_deter_sen(res_list):
             """)
 
     st.write("**Límite de potencia de los SAEB**")
-    st.write(r"""
-            $$ p_{n,b,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \quad \forall
+            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,t}^{ch} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,t}^{ch} \leq P_{n,b}^{SAEB} \quad \forall
+            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \quad \forall
+            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,t}^{dc} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,t}^{dc} \leq P_{n,b}^{SAEB} \quad \forall
+            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $Z$ es un valor constante muy grande; $u_{n,b,t}^{sta}$ es una variable binaria que modela el comportamiento del SAEB $n$
@@ -572,17 +704,15 @@ def text_formul_math_deter_sen(res_list):
             """)
 
     st.write("**Limite en el número de SAEB que se instalan**")
-    st.write(r"""
-            $$ u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N}, b \in \mathcal{B},
-            t \in \mathcal{T} $$
+    st.latex(r"""
+            u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B},
+            t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N},
-            b \in \mathcal{B}$$
+    st.latex(r"""
+            E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
             """)
-    st.write(r"""
-            $$ \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \hspace{2mm} \forall n \in \mathcal{N},
-            b \in \mathcal{B} $$
+    st.latex(r"""
+            \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
             """)
     st.write(r"""
             donde $N_{max}$ es el número máximo de SAEB que se pueden instalar.
@@ -593,15 +723,17 @@ def text_formul_math_escen_sen(res_list):
 
     if 'Operación de unidades térmicas detallada (rampas, Tiempos mínimos de encendido/apagado)' in res_list:
         st.write("## **Función Objetivo**")
-        st.write(r"""
-                $$ \begin{aligned}
-                    \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(C_{i}^{dn}\cdot SD_{i,t} + C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}arranque/parada} \\
-                    + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-                    E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-                    + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
-                \end{aligned}$$
+        st.latex(r"""
+                \begin{equation*}
+                    \begin{gathered}
+                        \min \underbrace{\sum_{i \in \mathcal{I}}\sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(C_{i}^{dn}\cdot SD_{i,t} + C_{i}^{up}\cdot SU_{i,t}\right)}_{Costos\hspace{1mm}de\hspace{1mm}arranque/parada} \\
+                        + \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+                        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+                        + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
+                    \end{gathered}
+                \end{equation*}
                 """)
         st.write(r"""
                 donde $C_{i}^{gen}$ es un vector que representa los costos de cada unidad de generación en \$/MW; $C_{i}^{dn}\cdot SD_{i,t}$ y
@@ -615,13 +747,15 @@ def text_formul_math_escen_sen(res_list):
                 """)
     else:
         st.write("## **Función Objetivo**")
-        st.write(r"""
-                $$ \begin{aligned}
-                    \min \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
-                    E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
-                    + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
-                    \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
-                \end{aligned}$$
+        st.latex(r"""
+                \begin{equation*}
+                    \begin{gathered}
+                        \min \underbrace{\sum_{n \in \mathcal{N}} \sum_{b \in \mathcal{B}} \left( P_{n,b}^{SAEB}\cdot C_{n}^{pot} +
+                        E_{n}^{SAEB}\cdot C_{n,b}^{ene}\right)}_{Costos\hspace{1mm}por\hspace{1mm}SAEB} \\
+                        + \underbrace{\sum_{s \in \mathcal{S}} \pi_{s} \sum_{j \in \mathcal{J}} \sum_{b \in \mathcal{B}}\sum_{t \in \mathcal{T}}
+                        \left(p_{i,b,s,t}^{re}\cdot C_{i,s}^{gen} + \left(p_{i,b,s,t}^{re} - p_{i,d,s,t}^{id} \right)\cdot C_{t,s}^{MPO} \right)}_{Penalización} \\
+                    \end{gathered}
+                \end{equation*}
                 """)
         st.write(r"""
                 donde $C_{i}^{gen}$ es un vector que representa los costos de cada unidad de generación en \$/MW; $P_{n,b}^{SAEB}$
@@ -640,13 +774,13 @@ def text_formul_math_escen_sen(res_list):
     st.write("**Balance de Potencia**")
 
     if 'Pérdidas' in res_list:
-        st.write(r"""
-                $$ \begin{aligned}
+        st.latex(r"""
+                \begin{aligned}
                     \sum_{i \in \mathcal{I}_{b}} p_{i,b,s,t}^{re}  - \sum_{(b,r) \in \mathcal{L}}
-                    \left(p_{b,r,s,t}^{pf} + \frac{1}{2} q_{b,r,s,t}^{pf} \right) + \\ \sum_{n \in \mathcal{N}_{b}}
-                    \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \hspace{2mm} \forall
+                    \left(p_{b,r,s,t}^{pf} + \frac{1}{2} q_{b,r,s,t}^{pf} \right) + \sum_{n \in \mathcal{N}_{b}}
+                    \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \quad \forall
                     b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
-                \end{aligned}$$
+                \end{aligned}
                 """)
         st.write(r"""
                 donde $p_{b,r,s,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ para el escenario $s$ en cada
@@ -656,13 +790,13 @@ def text_formul_math_escen_sen(res_list):
                 escenario $s$ en el instante de tiempo $t$; $D_{b,s,t}^{r}$ la demanda real del sistema del día estudiado.
                 """)
     else:
-        st.write(r"""
-                $$ \begin{aligned}
+        st.latex(r"""
+                \begin{aligned}
                     \sum_{i \in \mathcal{I}_{b}} p_{i,b,s,t}^{re} - \sum_{(b,r) \in \mathcal{L}}
                     p_{b,r,s,t}^{pf} + \sum_{n \in \mathcal{N}_{b}}
-                    \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \\ \hspace{2mm} \forall
+                    \left(p_{n,b,s,t}^{dc} - p_{n,b,s,t}^{ch} \right) = D_{b,s,t}^{f} \\ \quad \forall
                     b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
-                \end{aligned}$$
+                \end{aligned}
                 """)
         st.write(r"""
                 donde $p_{b,r,s,t}^{pf}$ es el flujo de potencia activa en cada línea conectada entre los nodos $b$ y $r$ para el escenario $s$ en cada
@@ -672,9 +806,9 @@ def text_formul_math_escen_sen(res_list):
                 """)
 
     st.write("### Límites en Generación")
-    st.write(r"""
-            $$ P_{i,s}^{min} \leq p_{i,b,s,t}^{re} \leq P_{i,s}^{max} \hspace{2mm} \forall
-            i \in \mathcal{I}, b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T} $$
+    st.latex(r"""
+            P_{i,s}^{min} \leq p_{i,b,s,t}^{re} \leq P_{i,s}^{max} \quad \forall
+            i \in \mathcal{I}, b \in \mathcal{B}, s \in \mathcal{S}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $P_{i,s}^{min}$ y $P_{i,s}^{max}$ son los límites mínimos y máximos de la capacidad de generación térmica, respectivamente.
@@ -685,13 +819,13 @@ def text_formul_math_escen_sen(res_list):
         st.write("### Operación de Generadores Térmicos")
 
         st.write("**Rampas de generadores térmicos**")
-        st.write(r"""
-                $$ p_{i,s,t+1}^{re} - p_{i,s,t}^{re} \leq R_{i,s}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i,s}^{min} \hspace{2mm}
-                \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I} $$
+        st.latex(r"""
+                p_{i,s,t+1}^{re} - p_{i,s,t}^{re} \leq R_{i,s}^{up} \cdot x_{i,t} + SU_{i,t+1} \cdot P_{i,s}^{min} \quad
+                \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I}
                 """)
-        st.write(r"""
-                $$ p_{i,s,t}^{re} - p_{i,s,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i,s}^{min} \hspace{2mm}
-                \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I} $$
+        st.latex(r"""
+                p_{i,s,t}^{re} - p_{i,s,t+1}^{re} \leq R_{i}^{dn} \cdot x_{i,t} + SD_{i,t+1} \cdot P_{i,s}^{min} \quad
+                \forall t, t + 1 \in \mathcal{T}, s \in \mathcal{S}, i \in \mathcal{I}
                 """)
         st.write(r"""
                 donde $R_{i}^{up}$ y $R_{i}^{dn}$ son las rampas de potencia de subida y bajada de las unidades de generación térmica, respectivamente;
@@ -700,21 +834,19 @@ def text_formul_math_escen_sen(res_list):
                 """)
 
         st.write("**Variables binarias de operación de unidades térmicas**")
-        st.write(r"""
-                $$ SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \hspace{2mm} \forall
-                t \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                SU_{i,t} - SD_{i,t} = x_{i,t} - x_{i,t-1} \quad \forall t \in \mathcal{T}, i \in \mathcal{I}
                 """)
-        st.write(r"""
-                $$ SU_{i,t} + SD_{i,t} \leq 1 \hspace{2mm} \forall
-                t \in \mathcal{T}, i \in \mathcal{I} $$
+        st.latex(r"""
+                SU_{i,t} + SD_{i,t} \leq 1 \quad \forall t \in \mathcal{T}, i \in \mathcal{I}
                 """)
 
     if 'Pérdidas' in res_list:
         st.write("### Flujo de potencia DC y pérdidas")
         st.write("**Cálculo del flujo de potencia por cada línea**")
-        st.write(r"""
-                $$ p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \hspace{2mm} \forall
-                (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \quad \forall
+                (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,s}$ y $\delta_{r,s}$ representan el
@@ -722,21 +854,19 @@ def text_formul_math_escen_sen(res_list):
                 """)
 
         st.write("**Cálculo de las pérdidas eléctricas de cada línea**")
-        st.write(r"""
-                $$ q_{b,r,s,t}^{pf} = G_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right)^2 \hspace{2mm}
-                \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                q_{b,r,s,t}^{pf} = G_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right)^2 \quad
+                \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
-        st.write(r"""
-                $$ \delta_{b,r,s}^{+} + \delta_{b,r,s}^{-} = \sum_{k=1}^{K} \delta_{b,r,s}(k)
-                \hspace{2mm} k = 1,...,K $$
+        st.latex(r"""
+                \delta_{b,r,s}^{+} + \delta_{b,r,s}^{-} = \sum_{k=1}^{K} \delta_{b,r,s}(k) \quad k = 1,...,K
                 """)
-        st.write(r"""
-                $$ \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \hspace{2mm}
-                k = 1, ... , K $$
+        st.latex(r"""
+                \alpha_{b,r}(k) = (2k-1)\cdot \Delta \delta_{b,r} \quad k = 1, ... , K
                 """)
-        st.write(r"""
-                $$ q_{b,r,s,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r,s}(k)
-                \hspace{2mm} \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                q_{b,r,s,t}^{pf} = G_{b,r}\cdot \sum_{k=1}^{K} \alpha_{b,r}(k)\cdot \delta_{b,r,s}(k)
+                \quad \forall (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $G_{b,r}$ es la conductancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,r,s}^{+}$ y $\delta_{b,r,s}^{-}$ son
@@ -746,9 +876,9 @@ def text_formul_math_escen_sen(res_list):
                 """)
 
         st.write("**Límites en el flujo de potencia en las líneas**")
-        st.write(r"""
-                $$ -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} + \frac{1}{2} \cdot q_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
-                \hspace{2mm} \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} + \frac{1}{2} \cdot q_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
+                \quad \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
@@ -757,9 +887,9 @@ def text_formul_math_escen_sen(res_list):
     else:
         st.write("### Flujo de potencia DC")
         st.write("**Cálculo del flujo de potencia por cada línea**")
-        st.write(r"""
-                $$ p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \hspace{2mm} \forall
-                (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                p_{b,r,s,t}^{pf} = B_{b,r} \cdot \left(\delta_{b,s} - \delta_{r,s} \right) \quad \forall
+                (b,r) \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $B_{b,r}$ es la susceptancia de la línea que se conecta entre los nodos $b$ y $r$; $\delta_{b,s}$ y $\delta_{r,s}$ representan el
@@ -767,9 +897,9 @@ def text_formul_math_escen_sen(res_list):
                 """)
 
         st.write("**Límites en el flujo de potencia en las líneas**")
-        st.write(r"""
-                $$ -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
-                \hspace{2mm} \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T} $$
+        st.latex(r"""
+                -P_{b,r}^{max} \leq p_{b,r,s,t}^{pf} \leq P_{b,r}^{max}
+                \quad \forall l \in \mathcal{L}, s \in \mathcal{S}, t \in \mathcal{T}
                 """)
         st.write(r"""
                 donde $-P_{b,r}^{max}$ y $P_{b,r}^{max}$ son los límites mínimos y máximos de flujo de potencia en el flujo de potencia activa de la línea
@@ -778,10 +908,10 @@ def text_formul_math_escen_sen(res_list):
 
     st.write("### Restricciones sistemas de almacenamiento de energía basados en baterías")
     st.write("**Relación entre la potencia y energía de los SAEB**")
-    st.write(r"""
-            $$ e_{n,b,s,t} = e_{n,b,s,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,s,t}^{ch} -
-            \frac{P_{n,b,s,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \hspace{2mm} \forall
-            b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T} \hspace{10mm} $$
+    st.latex(r"""
+            e_{n,b,s,t} = e_{n,b,s,t-1}\cdot \left(1 - \eta_{n}^{SoC} \right) + \left( \eta^{ch}_{n} \cdot p_{n,b,s,t}^{ch} -
+            \frac{P_{n,b,s,t}^{dc}}{\eta^{dc}_{n}} \right)\cdot \Delta t \quad \forall
+            b \in \mathcal{B}, n \in \mathcal{N}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $e_{n,b,s,t}$ es la cantidad de energía actual del SAEB; $e_{n,b,s,t-1}$ es la cantidad de energía en el periodo anterior del SAEB;
@@ -790,9 +920,8 @@ def text_formul_math_escen_sen(res_list):
             """)
 
     st.write("**Límite de energía de los SAEB**")
-    st.write(r"""
-            $$ e_{n,b,s,t} \leq E_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            e_{n,b,s,t} \leq E_{n,b}^{SAEB} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $E_{n,b}^{SAEB}$ es la capacidad energética nominal del SAEB y constituye una variable de decisión que determina el tamaño del SAEB
@@ -800,21 +929,18 @@ def text_formul_math_escen_sen(res_list):
             """)
 
     st.write("**Límite de potencia de los SAEB**")
-    st.write(r"""
-            $$ p_{n,b,s,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,s,t}^{ch} \leq Z \cdot u_{n,b,t}^{sta} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,s,t}^{ch} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,s,t}^{ch} \leq P_{n,b}^{SAEB} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,s,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,s,t}^{dc} \leq Z \cdot \left(1 - u_{n,b,t}^{sta}\right) - Z \cdot \left(1 - u_{n,b}^{ins} \right) \quad \forall
+            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ p_{n,b,s,t}^{dc} \leq P_{n,b}^{SAEB} \hspace{2mm} \forall
-            n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T} $$
+    st.latex(r"""
+            p_{n,b,s,t}^{dc} \leq P_{n,b}^{SAEB} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
     st.write(r"""
             donde $Z$ es un valor constante muy grande; $u_{n,b,t}^{sta}$ es una variable binaria que modela el comportamiento del SAEB $n$
@@ -823,17 +949,14 @@ def text_formul_math_escen_sen(res_list):
             """)
 
     st.write("**Limite en el número de SAEB que se instalan**")
-    st.write(r"""
-            $$ u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N}, b \in \mathcal{B},
-            t \in \mathcal{T} $$
+    st.latex(r"""
+            u_{n,b,t}^{sta} \leq u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}, t \in \mathcal{T}
             """)
-    st.write(r"""
-            $$ E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \hspace{2mm} \forall n \in \mathcal{N},
-            b \in \mathcal{B}$$
+    st.latex(r"""
+            E_{n,b}^{SAEB} \leq Z \cdot u_{n,b}^{ins} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
             """)
-    st.write(r"""
-            $$ \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \hspace{2mm} \forall n \in \mathcal{N},
-            b \in \mathcal{B} $$
+    st.latex(r"""
+            \sum_{\mathcal{N}} u_{n,b}^{ins} \leq N_{max} \quad \forall n \in \mathcal{N}, b \in \mathcal{B}
             """)
     st.write(r"""
             donde $N_{max}$ es el número máximo de SAEB que se pueden instalar.
